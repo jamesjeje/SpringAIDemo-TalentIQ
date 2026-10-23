@@ -1,5 +1,6 @@
 package com.fdmgroup.Spring_AI_Demo.service;
 
+import com.fdmgroup.Spring_AI_Demo.mcp.DocumentTools;
 import com.fdmgroup.Spring_AI_Demo.model.CandidateMetadata;
 import org.springframework.ai.document.Document;
 import org.springframework.stereotype.Service;
@@ -15,19 +16,22 @@ public class ResumeProcessingService {
     private final ChunkingService chunkingService;
     private final VectorStoreService vectorStoreService;
     private final MetadataExtractionService metadataExtractionService;
+    private final DocumentTools documentTools;
 
-    public ResumeProcessingService(DocumentReaderService documentReaderService, DataCleaningService dataCleaningService, ChunkingService chunkingService, VectorStoreService vectorStoreService,  MetadataExtractionService metadataExtractionService) {
+    public ResumeProcessingService(DocumentReaderService documentReaderService, DataCleaningService dataCleaningService, ChunkingService chunkingService, VectorStoreService vectorStoreService,  MetadataExtractionService metadataExtractionService,DocumentTools documentTools) {
         this.documentReaderService = documentReaderService;
         this.dataCleaningService = dataCleaningService;
         this.chunkingService = chunkingService;
         this.vectorStoreService = vectorStoreService;
         this.metadataExtractionService = metadataExtractionService;
+        this.documentTools = documentTools;
     }
 
     public void processResume(MultipartFile file) {
         System.out.println("STEP 1 - Read document");
+
         String rawText =
-                documentReaderService.extractText(file);
+                documentTools.readDocument(file);
 
         String candidateName =
                 rawText.lines()
