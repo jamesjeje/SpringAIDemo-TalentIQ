@@ -1,22 +1,23 @@
 package com.fdmgroup.Spring_AI_Demo.service;
 
-import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fdmgroup.Spring_AI_Demo.dto.InterviewQuestionResponse;
 import com.fdmgroup.Spring_AI_Demo.dto.InterviewQuestion;
+import com.fdmgroup.Spring_AI_Demo.dto.InterviewQuestionResponse;
+import com.fdmgroup.Spring_AI_Demo.mcp.EmailTools;
+import org.springframework.stereotype.Service;
 
 @Service
 public class InterviewEmailService {
 
     private final InterviewQuestionGenerationService interviewQuestionService;
-    private final EmailService emailService;
+    private final EmailTools emailTools;
 
     public InterviewEmailService(
             InterviewQuestionGenerationService interviewQuestionService,
-            EmailService emailService) {
+            EmailTools emailTools) {
 
         this.interviewQuestionService = interviewQuestionService;
-        this.emailService = emailService;
+        this.emailTools = emailTools;
     }
 
     public void sendInterviewQuestions(
@@ -25,13 +26,14 @@ public class InterviewEmailService {
             String jobDescription)
             throws JsonProcessingException {
 
-        InterviewQuestionResponse response = interviewQuestionService.generateQuestions(
-                candidateName,
-                jobDescription);
+        InterviewQuestionResponse response =
+                interviewQuestionService.generateQuestions(
+                        candidateName,
+                        jobDescription);
 
         String emailBody = buildEmailBody(response);
 
-        emailService.sendEmail(
+        emailTools.sendEmail(
                 candidateEmail,
                 "Interview Questions - " + jobDescription,
                 emailBody);
@@ -48,10 +50,9 @@ public class InterviewEmailService {
 
         for (InterviewQuestion question : response.interviewQuestions()) {
 
-            body.append(count++)
-                    .append(". ")
-                    .append(question.question())
-                    .append("\n");
+            body.append("==================================\n");
+            body.append("Question ").append(count++).append("\n");
+            body.append("==================================\n\n");
 
             body.append("Category: ")
                     .append(question.category())
@@ -59,6 +60,14 @@ public class InterviewEmailService {
 
             body.append("Difficulty: ")
                     .append(question.difficulty())
+                    .append("\n\n");
+
+            body.append("Question:\n")
+                    .append(question.question())
+                    .append("\n\n");
+
+            body.append("Expected Answer:\n")
+                    .append(question.expectedAnswer())
                     .append("\n\n");
         }
 

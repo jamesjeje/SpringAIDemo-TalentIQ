@@ -59,7 +59,40 @@ public class QuestionReviewerAgent {
                     - 1 Behavioural question
                     - 1 System Design question
 
-                    Return improved JSON only.
+                    Return ONLY valid JSON.
+                    
+                    Do not wrap the response in markdown.
+                    Do not use ```json.
+                    Do not provide any explanation.
+                    
+                    Expected format:
+                    
+                    {
+                    "interview_questions": [
+                    {
+                    "category": "string",
+                    "question": "string",
+                    "difficulty": "string",
+                    "focusArea": "string",
+                    "expectedAnswer": "string"
+                    }
+                    ]
+                    }
+                   
+                    Do not add any additional properties.
+                   
+                    Allowed properties:
+                    - category
+                    - question
+                    - difficulty
+                    - focusArea
+                    - expectedAnswer
+                   
+                    Do NOT use:
+                    - expectedArea
+                    - answer
+                    - sampleAnswer
+                    - explanation
                     """
                     .formatted(
                             jobDescription,
@@ -71,6 +104,14 @@ public class QuestionReviewerAgent {
                             .user(prompt)
                             .call()
                             .content();
+
+            response = response
+                    .replace("```json", "")
+                    .replace("```", "")
+                    .trim();
+            System.out.println("===== CLEANED REVIEWER RESPONSE =====");
+            System.out.println(response);
+
 
             return objectMapper.readValue(
                     response,

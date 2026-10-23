@@ -6,6 +6,7 @@ import com.fdmgroup.Spring_AI_Demo.dto.InterviewQuestionResponse;
 import com.fdmgroup.Spring_AI_Demo.dto.SendInterviewEmailRequest;
 import com.fdmgroup.Spring_AI_Demo.service.InterviewEmailService;
 import com.fdmgroup.Spring_AI_Demo.service.InterviewQuestionGenerationService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -37,7 +38,7 @@ public class InterviewController {
 
     @PostMapping("/send-email")
     public ResponseEntity<String> sendInterviewQuestions(
-            @RequestBody SendInterviewEmailRequest request)
+            @Valid @RequestBody SendInterviewEmailRequest request)
             throws JsonProcessingException {
 
         interviewEmailService.sendInterviewQuestions(
