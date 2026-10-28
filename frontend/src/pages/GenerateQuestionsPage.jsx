@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Accordion,
   AccordionDetails,
@@ -19,6 +19,7 @@ import {
 } from '@mui/material'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { useLocation } from 'react-router-dom'
 import { generateQuestions } from '../services/talentIQService'
 import { PageHeader } from '../components/PageHeader'
 import { DashboardSummary } from '../components/DashboardSummary'
@@ -34,13 +35,24 @@ const categoryStyles = {
 }
 
 export function GenerateQuestionsPage() {
+  const location = useLocation()
   const [form, setForm] = useState({
-    candidateName: '',
-    jobDescription: '',
+    candidateName: location.state?.candidateName || '',
+    jobDescription: location.state?.jobDescription || '',
   })
   const [questions, setQuestions] = useState([])
   const [status, setStatus] = useState({ type: 'info', message: 'Provide the candidate name and role criteria to generate a tailored interview set.' })
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  useEffect(() => {
+    if (location.state?.candidateName || location.state?.jobDescription) {
+      setForm((current) => ({
+        ...current,
+        ...(location.state.candidateName ? { candidateName: location.state.candidateName } : {}),
+        ...(location.state.jobDescription ? { jobDescription: location.state.jobDescription } : {}),
+      }))
+    }
+  }, [location.state])
 
   const loadingSteps = useMemo(
     () => [
@@ -59,8 +71,13 @@ export function GenerateQuestionsPage() {
   const handleSubmit = async (event) => {
     event.preventDefault()
 
-    if (!form.candidateName.trim() || !form.jobDescription.trim()) {
-      setStatus({ type: 'error', message: 'Both candidate name and job description are required.' })
+    if (!form.jobDescription.trim()) {
+      setStatus({ type: 'error', message: 'Please enter a job description before generating interview questions.' })
+      return
+    }
+
+    if (!form.candidateName.trim()) {
+      setStatus({ type: 'error', message: 'Please enter the candidate name before generating interview questions.' })
       return
     }
 
@@ -68,7 +85,10 @@ export function GenerateQuestionsPage() {
       setIsSubmitting(true)
       setStatus({ type: 'info', message: 'Generating interview questions…' })
 
-      const result = await generateQuestions(form)
+      const result = await generateQuestions({
+        candidateName: form.candidateName,
+        jobDescription: form.jobDescription,
+      })
       const nextQuestions = result?.interviewQuestions ?? result?.interview_questions ?? []
       setQuestions(nextQuestions)
 
